@@ -1,6 +1,6 @@
 import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 import { ensureUser } from '../services/users.js';
-import { getOwnedCardCopy } from '../services/cards.js';
+import { getInventory, getOwnedCardCopy } from '../services/cards.js';
 import { addToSquad, autoSquad, getSquad, removeFromSquad, squadRating } from '../services/squads.js';
 import { cardRating } from '../utils/format.js';
 
@@ -55,10 +55,14 @@ export async function execute(interaction) {
   }
 
   const squad = await getSquad(user.id);
+  const inventory = await getInventory(user.id, 1, 1);
   const embed = new EmbedBuilder()
     .setTitle(`${interaction.user.username} sin tropp`)
     .setColor(0x2f80ed)
     .setDescription(renderSquad(squad))
-    .addFields({ name: 'Total styrke', value: String(squadRating(squad)), inline: true });
+    .addFields(
+      { name: 'Total styrke', value: String(squadRating(squad)), inline: true },
+      { name: 'Kort i inventory', value: String(inventory.total), inline: true }
+    );
   await interaction.reply({ embeds: [embed] });
 }

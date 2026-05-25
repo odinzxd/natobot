@@ -21,9 +21,34 @@ client.on(Events.InteractionCreate, async (interaction) => {
   const command = client.commands.get(interaction.commandName);
   if (!command) return;
 
+  const originalReply = interaction.reply.bind(interaction);
+  const originalFollowUp = interaction.followUp.bind(interaction);
+  const originalDeferReply = interaction.deferReply.bind(interaction);
+  let deferTimer;
+
+  interaction.reply = async (options) => {
+    clearTimeout(deferTimer);
+    if (interaction.deferred) {
+      if (typeof options === 'object' && options !== null && 'ephemeral' in options) {
+        const { ephemeral, ...editOptions } = options;
+        return interaction.editReply(editOptions);
+      }
+      return interaction.editReply(options);
+    }
+    if (interaction.replied) return originalFollowUp(options);
+    return originalReply(options);
+  };
+
   try {
+    deferTimer = setTimeout(() => {
+      if (!interaction.deferred && !interaction.replied) {
+        originalDeferReply().catch((error) => console.error(`[command] Failed to defer ${interaction.commandName}:`, error));
+      }
+    }, 2000);
     await command.execute(interaction);
+    clearTimeout(deferTimer);
   } catch (error) {
+    clearTimeout(deferTimer);
     console.error(`[command] ${interaction.commandName} failed:`, error);
     const message = error.message || 'Noe gikk galt. Prøv igjen senere.';
     if (interaction.replied || interaction.deferred) {
