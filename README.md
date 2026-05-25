@@ -37,10 +37,10 @@ scripts/             Manuell migrate/seed/command deploy
 ```env
 DISCORD_TOKEN=...
 CLIENT_ID=...
-GUILD_ID=...
+GUILD_ID=
 DATABASE_URL=postgresql://...
 OWNER_IDS=din_discord_user_id
-ADMIN_ROLE_ID=optional_role_id
+ADMIN_ROLE_ID=
 ```
 
 5. Installer dependencies:
@@ -87,14 +87,19 @@ Ved startup kjører botten også migration, seed og slash-command registration a
 6. Legg inn miljøvariabler i Railway:
 
 ```env
-DISCORD_TOKEN=...
-CLIENT_ID=...
-GUILD_ID=optional_test_server_id
+DISCORD_TOKEN=real_bot_token_from_discord_developer_portal
+CLIENT_ID=real_numeric_discord_application_id
+GUILD_ID=optional_numeric_discord_server_id_or_leave_empty
 DATABASE_URL=${{Postgres.DATABASE_URL}}
-OWNER_IDS=din_discord_user_id
-ADMIN_ROLE_ID=optional_role_id
+OWNER_IDS=your_numeric_discord_user_id
+ADMIN_ROLE_ID=optional_numeric_role_id_or_leave_empty
 NODE_ENV=production
 ```
+
+Do not paste the placeholder values from `.env.example` into Railway. If Railway logs show a URL containing
+`your_discord_application_id` or `optional_test_server_id_for_fast_command_registration`, the variables are still wrong.
+
+`DATABASE_URL` must be a PostgreSQL URL like `postgresql://...`. It must not be a volume path such as `/var/lib/postgresql/data`.
 
 7. Railway bruker `npm start` fra `package.json`.
 8. Første deploy vil kjøre migrations og seed automatisk ved startup.
