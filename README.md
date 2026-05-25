@@ -7,9 +7,9 @@ Natobot er en Discord-bot bygget i Node.js med `discord.js` og PostgreSQL. Den f
 - Slash commands for alle bruker- og adminfunksjoner.
 - Automatisk brukerregistrering første gang en bruker kjører en command.
 - PostgreSQL-lagring av brukere, kort, eierskap, squads, battles, trades, marketplace, cooldowns og transactions.
-- `/claim` med 3 timers cooldown og droprates: Common 60 %, Rare 25 %, Epic 10 %, Legendary 4 %, Mythic 1 %.
+- `/claim` med 3 timers cooldown og droprates: Common 62 %, Rare 25 %, Epic 9 %, Legendary 3,5 %, Mythic 0,5 %.
 - Inventory, kortinfo, squads på opptil 5 kort, kampberegning med stats, rarity-bonus og random variasjon.
-- Coins, daily, shop, Basic/Premium/Legendary packs, leaderboards.
+- Coins, daily, shop, Low/Standard/Legendary packs, quick-sell og leaderboards.
 - Sikker trading med locked cards og accept fra begge parter.
 - Marketplace med sell, buy, cancel og list.
 - Admin commands for kort, coins, claim reset og databaseinfo.
@@ -125,7 +125,8 @@ Do not paste the placeholder values from `.env.example` into Railway. If Railway
 - `/balance`
 - `/daily`
 - `/shop`
-- `/buy pack:premium`
+- `/buy pack:standard`
+- `/sell card:123`
 - `/leaderboard type:wins`
 - `/trade start user:@bruker`
 - `/trade add-card trade-id:1 card:123`
@@ -139,6 +140,16 @@ Do not paste the placeholder values from `.env.example` into Railway. If Railway
 ## Kort og copy-id
 
 Inventory grupperer duplikater etter korttype, men viser copy-id-er internt i databasen når kort brukes i squad, trade og marketplace. Du kan bruke kortnavn for enkel bruk, eller copy-id når du vil styre akkurat hvilken duplikat som brukes.
+
+## Økonomi
+
+- Low Pack: 5 000 coins, 3 kort, mest Common/Rare.
+- Standard Pack: 10 000 coins, 4 kort, balansert hovedpakke.
+- Legendary Pack: 100 000 coins, 5 kort, garantert minst Epic og høy Legendary/Mythic-sjanse.
+- Nye brukere starter med 10 000 coins.
+- Daily gir 7 500 coins.
+- Battle winner får 3 500 coins, taper får 750 coins.
+- `/sell` selger et kort direkte til systemet. Sell-pris beregnes fra rarity og rating og lagres i databasen.
 
 ## Admin-tilgang
 

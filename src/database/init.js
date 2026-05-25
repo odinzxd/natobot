@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { query } from './pool.js';
 import { seedCards } from '../data/cards.js';
+import { cardSellValue } from '../utils/format.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -16,10 +17,11 @@ export async function seed() {
   const seedNames = seedCards.map((card) => card.name);
 
   for (const card of seedCards) {
+    const sellValue = card.sell_value || cardSellValue(card);
     await query(
       `INSERT INTO cards
-        (name, image_url, rarity, category, description, attack, defense, influence, strategy, charisma)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+        (name, image_url, rarity, category, description, attack, defense, influence, strategy, charisma, sell_value)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
        ON CONFLICT (name) DO UPDATE SET
         image_url = EXCLUDED.image_url,
         rarity = EXCLUDED.rarity,
@@ -29,7 +31,9 @@ export async function seed() {
         defense = EXCLUDED.defense,
         influence = EXCLUDED.influence,
         strategy = EXCLUDED.strategy,
-        charisma = EXCLUDED.charisma`,
+        charisma = EXCLUDED.charisma,
+        sell_value = EXCLUDED.sell_value,
+        active = TRUE`,
       [
         card.name,
         card.image_url,
@@ -40,7 +44,8 @@ export async function seed() {
         card.defense,
         card.influence,
         card.strategy,
-        card.charisma
+        card.charisma,
+        sellValue
       ]
     );
   }

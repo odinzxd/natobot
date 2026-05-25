@@ -23,8 +23,8 @@ export async function runBattle(challenger, opponent) {
   const challengerWon = challengerScore >= opponentScore;
   const winner = challengerWon ? challenger : opponent;
   const loser = challengerWon ? opponent : challenger;
-  const reward = 250;
-  const consolation = 50;
+  const reward = 3500;
+  const consolation = 750;
 
   await withTransaction(async (client) => {
     await client.query('UPDATE users SET coins = coins + $1, xp = xp + 120, wins = wins + 1, level = FLOOR((xp + 120) / 500) + 1 WHERE id = $2', [

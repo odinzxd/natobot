@@ -3,7 +3,7 @@ import * as inventory from './inventory.js';
 import * as card from './card.js';
 import * as squad from './squad.js';
 import * as battle from './battle.js';
-import { balance, shop, buy, daily, leaderboard } from './economy.js';
+import { balance, shop, buy, sell, daily, leaderboard } from './economy.js';
 import * as trade from './trade.js';
 import * as market from './market.js';
 import * as admin from './admin.js';
@@ -17,6 +17,7 @@ export const commands = [
   balance,
   shop,
   buy,
+  sell,
   daily,
   leaderboard,
   trade,

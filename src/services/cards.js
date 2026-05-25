@@ -31,7 +31,7 @@ export async function grantCard(userId, cardId) {
 export async function getInventory(userId, page = 1, pageSize = 10) {
   const offset = (page - 1) * pageSize;
   const rows = await query(
-    `SELECT c.id AS card_id, c.name, c.rarity, c.attack, c.defense, c.influence, c.strategy, c.charisma,
+    `SELECT c.id AS card_id, c.name, c.rarity, c.attack, c.defense, c.influence, c.strategy, c.charisma, c.sell_value,
             COUNT(uc.id)::INT AS count,
             ARRAY_AGG(uc.id ORDER BY uc.id) AS copies
      FROM user_cards uc
@@ -83,6 +83,7 @@ export function cardEmbed(card, title = card.name) {
       { name: 'Rarity', value: card.rarity, inline: true },
       { name: 'Kategori', value: card.category, inline: true },
       { name: 'Rating', value: String(cardRating(card)), inline: true },
+      { name: 'Sell value', value: `${card.sell_value.toLocaleString('no-NO')} coins`, inline: true },
       { name: 'Attack', value: String(card.attack), inline: true },
       { name: 'Defense', value: String(card.defense), inline: true },
       { name: 'Influence', value: String(card.influence), inline: true },

@@ -1,7 +1,8 @@
 import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 import { query } from '../database/pool.js';
 import { ensureUser, addCoins } from '../services/users.js';
-import { buyPack } from '../services/economy.js';
+import { buyPack, sellOwnedCard } from '../services/economy.js';
+import { getOwnedCardCopy } from '../services/cards.js';
 import { packConfigs, formatDuration, cardRating, rarityColors } from '../utils/format.js';
 import { config } from '../config.js';
 
@@ -25,7 +26,14 @@ export const balance = {
 export const shop = {
   data: new SlashCommandBuilder().setName('shop').setDescription('Vis kortpakker i butikken.'),
   async execute(interaction) {
-    const lines = Object.entries(packConfigs).map(([key, pack]) => `/buy pack:${key} - ${pack.label} - ${pack.price} coins - ${pack.cards} kort`);
+    const lines = Object.entries(packConfigs).map(
+      ([key, pack]) =>
+        `/buy pack:${key} - ${pack.label} - ${pack.price.toLocaleString('no-NO')} coins - ${pack.cards} kort\n` +
+        `${pack.description}\n` +
+        `Rates: ${Object.entries(pack.rates)
+          .map(([rarity, rate]) => `${rarity} ${rate}%`)
+          .join(', ')}`
+    );
     const embed = new EmbedBuilder().setTitle('NATO Pack Shop').setColor(0x57f287).setDescription(lines.join('\n'));
     await interaction.reply({ embeds: [embed] });
   }
@@ -41,9 +49,9 @@ export const buy = {
         .setDescription('Pakke')
         .setRequired(true)
         .addChoices(
-          { name: 'Basic Pack', value: 'basic' },
-          { name: 'Premium Pack', value: 'premium' },
-          { name: 'Legendary Pack', value: 'legendary' }
+          { name: 'Low Pack - 5 000 coins', value: 'low' },
+          { name: 'Standard Pack - 10 000 coins', value: 'standard' },
+          { name: 'Legendary Pack - 100 000 coins', value: 'legendary' }
         )
     ),
   async execute(interaction) {
@@ -55,6 +63,32 @@ export const buy = {
       .setColor(rarityColors[best.rarity])
       .setDescription(cards.map((card) => `${card.name} [${card.rarity}] - ${cardRating(card)}`).join('\n'))
       .setImage(best.image_url || null);
+    await interaction.reply({ embeds: [embed] });
+  }
+};
+
+export const sell = {
+  data: new SlashCommandBuilder()
+    .setName('sell')
+    .setDescription('Selg et kort direkte til systemet for coins.')
+    .addStringOption((option) => option.setName('card').setDescription('Kortnavn eller copy-id fra inventory').setRequired(true)),
+  async execute(interaction) {
+    const user = await ensureUser(interaction.user);
+    const owned = await getOwnedCardCopy(user.id, interaction.options.getString('card'));
+    if (!owned) {
+      await interaction.reply({ content: 'Fant ikke et tilgjengelig kort du eier.', ephemeral: true });
+      return;
+    }
+
+    const sold = await sellOwnedCard(user.id, owned.user_card_id);
+    const embed = new EmbedBuilder()
+      .setTitle(`Solgte ${sold.name}`)
+      .setColor(rarityColors[sold.rarity])
+      .setDescription(`Du fikk ${sold.sell_value.toLocaleString('no-NO')} coins.`)
+      .addFields(
+        { name: 'Rarity', value: sold.rarity, inline: true },
+        { name: 'Rating', value: String(cardRating(sold)), inline: true }
+      );
     await interaction.reply({ embeds: [embed] });
   }
 };
@@ -71,9 +105,9 @@ export const daily = {
         return;
       }
     }
-    await addCoins(user.id, 700, 'daily');
+    await addCoins(user.id, 7500, 'daily');
     await query('UPDATE users SET last_daily_at = NOW() WHERE id = $1', [user.id]);
-    await interaction.reply('Du fikk 700 coins fra daily.');
+    await interaction.reply('Du fikk 7 500 coins fra daily.');
   }
 };
 
