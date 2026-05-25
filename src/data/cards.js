@@ -1,362 +1,232 @@
-export const seedCards = [
-  {
-    name: 'Erna Solberg',
-    image_url: 'https://upload.wikimedia.org/wikipedia/commons/1/1d/Erna_Solberg_2018.jpg',
-    rarity: 'Legendary',
-    category: 'Politiker',
-    description: 'Jernlady med Excel-aura og overraskende comeback-statistikk.',
-    attack: 78,
-    defense: 88,
-    influence: 91,
-    strategy: 92,
-    charisma: 76
+const rarityProfiles = {
+  Common: { base: 48, spread: 16, sell: 250 },
+  Rare: { base: 61, spread: 15, sell: 1200 },
+  Epic: { base: 73, spread: 14, sell: 4200 },
+  Legendary: { base: 84, spread: 12, sell: 14500 },
+  Mythic: { base: 93, spread: 8, sell: 42000 }
+};
+
+const categoryProfiles = {
+  'Militær/Strategi': {
+    description: 'Strategikort med krigsledelse, taktikk og hard kampkontroll.',
+    modifiers: { attack: 7, defense: 5, influence: 1, strategy: 9, charisma: 0 }
   },
-  {
-    name: 'Jonas Gahr Støre',
-    image_url: 'https://upload.wikimedia.org/wikipedia/commons/9/98/Jonas_Gahr_Store_2022.jpg',
-    rarity: 'Epic',
-    category: 'Politiker',
-    description: 'Diplomatisk midtbanedirigent med langpasninger i PowerPoint.',
-    attack: 72,
-    defense: 75,
-    influence: 89,
-    strategy: 86,
-    charisma: 74
+  Statsleder: {
+    description: 'Statslederkort med makt, diplomati og politisk kontroll.',
+    modifiers: { attack: 2, defense: 4, influence: 9, strategy: 6, charisma: 4 }
   },
-  {
-    name: 'Jens Stoltenberg',
-    image_url: 'https://upload.wikimedia.org/wikipedia/commons/3/3f/Jens_Stoltenberg_2022_%28cropped%29.jpg',
-    rarity: 'Mythic',
-    category: 'Militaer/Strategi',
-    description: 'NATO-generalens kaffekopp. Gir troppen kollektiv forsvarsbonus i ånden.',
-    attack: 82,
-    defense: 95,
-    influence: 96,
-    strategy: 97,
-    charisma: 88
+  Politiker: {
+    description: 'Politikerkort med debattkraft, nettverk og taktisk spill.',
+    modifiers: { attack: 0, defense: 4, influence: 7, strategy: 7, charisma: 4 }
   },
-  {
-    name: 'Donald Trump',
-    image_url: 'https://upload.wikimedia.org/wikipedia/commons/5/56/Donald_Trump_official_portrait.jpg',
-    rarity: 'Legendary',
-    category: 'Statsleder',
-    description: 'Kaotisk power-card med høy attack og uforutsigbar random-faktor.',
-    attack: 92,
-    defense: 63,
-    influence: 95,
-    strategy: 72,
-    charisma: 90
+  Kjendis: {
+    description: 'Kjendiskort med enorm oppmerksomhet, hype og publikumsbuff.',
+    modifiers: { attack: 4, defense: 0, influence: 8, strategy: 2, charisma: 9 }
   },
-  {
-    name: 'Barack Obama',
-    image_url: 'https://upload.wikimedia.org/wikipedia/commons/8/8d/President_Barack_Obama.jpg',
-    rarity: 'Legendary',
-    category: 'Statsleder',
-    description: 'Karismabombe med tale-buff og rolig clutch-energi.',
-    attack: 78,
-    defense: 82,
-    influence: 94,
-    strategy: 88,
-    charisma: 98
-  },
-  {
-    name: 'Vladimir Putin',
-    image_url: 'https://upload.wikimedia.org/wikipedia/commons/4/47/Vladimir_Putin_17-11-2021.jpg',
-    rarity: 'Legendary',
-    category: 'Statsleder',
-    description: 'Mørkt boss-card med høy strategi, men lav fair play-rating.',
-    attack: 90,
-    defense: 84,
-    influence: 88,
-    strategy: 91,
-    charisma: 55
-  },
-  {
-    name: 'Elon Musk',
-    image_url: 'https://upload.wikimedia.org/wikipedia/commons/e/ed/Elon_Musk_Royal_Society_%28crop2%29.jpg',
-    rarity: 'Epic',
-    category: 'Kjendis',
-    description: 'Rakettboost, meme-modus og et dash produksjonskaos.',
-    attack: 86,
-    defense: 58,
-    influence: 96,
-    strategy: 80,
-    charisma: 79
-  },
-  {
-    name: 'Cristiano Ronaldo',
-    image_url: 'https://upload.wikimedia.org/wikipedia/commons/8/8c/Cristiano_Ronaldo_2018.jpg',
-    rarity: 'Legendary',
-    category: 'Idrett',
-    description: 'Siuuu-buffen slår hardt i sluttminuttene.',
-    attack: 98,
-    defense: 62,
-    influence: 91,
-    strategy: 80,
-    charisma: 95
-  },
-  {
-    name: 'Taylor Swift',
-    image_url: 'https://upload.wikimedia.org/wikipedia/commons/0/0c/Taylor_Swift_at_the_2023_MTV_Video_Music_Awards.png',
-    rarity: 'Legendary',
-    category: 'Kjendis',
-    description: 'Stadionkontroll, fan-armé og bridge som morale boost.',
-    attack: 76,
-    defense: 74,
-    influence: 99,
-    strategy: 87,
-    charisma: 97
-  },
-  {
-    name: 'Gordon Ramsay',
-    image_url: 'https://upload.wikimedia.org/wikipedia/commons/6/6f/Gordon_Ramsay.jpg',
-    rarity: 'Epic',
-    category: 'Kjendis',
-    description: 'Kjøkkenkommandør. Kritiserer fiendens formasjon til den faller sammen.',
-    attack: 89,
-    defense: 69,
-    influence: 82,
-    strategy: 77,
-    charisma: 86
-  },
-  {
-    name: 'Kong Harald',
-    image_url: 'https://upload.wikimedia.org/wikipedia/commons/0/0c/King_Harald_V_of_Norway_in_2021.jpg',
-    rarity: 'Mythic',
-    category: 'Historisk',
-    description: 'Kongelig stabilitetsaura. Troppen bukker automatisk.',
-    attack: 67,
-    defense: 93,
-    influence: 95,
-    strategy: 84,
-    charisma: 94
-  },
-  {
-    name: 'Angela Merkel',
-    image_url: 'https://upload.wikimedia.org/wikipedia/commons/2/2d/Angela_Merkel_July_2010_-_3zu4.jpg',
-    rarity: 'Legendary',
-    category: 'Politiker',
-    description: 'Defensiv mur med maksimal tålmodighets-stat.',
-    attack: 70,
-    defense: 96,
-    influence: 93,
-    strategy: 94,
-    charisma: 75
-  },
-  {
-    name: 'Greta Thunberg',
-    image_url: 'https://upload.wikimedia.org/wikipedia/commons/6/6e/Greta_Thunberg_4.jpg',
-    rarity: 'Epic',
-    category: 'Aktivist',
-    description: 'Global proteststemme med høy influence og press på late motstandere.',
-    attack: 75,
-    defense: 70,
-    influence: 90,
-    strategy: 76,
-    charisma: 84
-  },
-  {
-    name: 'Napoleon Bonaparte',
-    image_url: 'https://upload.wikimedia.org/wikipedia/commons/5/50/Jacques-Louis_David_-_The_Emperor_Napoleon_in_His_Study_at_the_Tuileries_-_Google_Art_Project.jpg',
-    rarity: 'Legendary',
-    category: 'Historisk',
-    description: 'Høy strategi, lav vinterlogistikk.',
-    attack: 94,
-    defense: 78,
-    influence: 92,
-    strategy: 98,
-    charisma: 81
-  },
-  {
-    name: 'Albert Einstein',
-    image_url: 'https://upload.wikimedia.org/wikipedia/commons/d/d3/Albert_Einstein_Head.jpg',
-    rarity: 'Epic',
-    category: 'Historisk',
-    description: 'Strategisk relativitet. Gjør rare lagvalg plutselig smarte.',
-    attack: 55,
-    defense: 66,
-    influence: 92,
-    strategy: 99,
-    charisma: 80
-  },
-  {
-    name: 'MrBeast',
-    image_url: 'https://upload.wikimedia.org/wikipedia/commons/c/ce/MrBeast_2023_%28cropped%29.jpg',
-    rarity: 'Rare',
-    category: 'Kjendis',
-    description: 'Kaster coins på problemet til det forsvinner.',
-    attack: 74,
-    defense: 60,
-    influence: 88,
-    strategy: 73,
-    charisma: 89
-  },
-  {
-    name: 'Boris Johnson',
-    image_url: 'https://upload.wikimedia.org/wikipedia/commons/6/6d/Boris_Johnson_official_portrait_%28cropped%29.jpg',
-    rarity: 'Rare',
-    category: 'Politiker',
-    description: 'Uryddig presskonferansekort med overraskende dodge.',
-    attack: 71,
-    defense: 58,
-    influence: 79,
-    strategy: 63,
-    charisma: 83
-  },
-  {
-    name: 'Sanna Marin',
-    image_url: 'https://upload.wikimedia.org/wikipedia/commons/b/b7/Sanna_Marin_2021_%28cropped%29.jpg',
-    rarity: 'Rare',
-    category: 'Politiker',
-    description: 'Tempo, modernisering og solid party-resilience.',
-    attack: 73,
-    defense: 70,
-    influence: 82,
-    strategy: 78,
-    charisma: 87
-  },
-  {
-    name: 'Volodymyr Zelenskyj',
-    image_url: 'https://upload.wikimedia.org/wikipedia/commons/9/9c/Volodymyr_Zelensky_Official_portrait.jpg',
-    rarity: 'Legendary',
-    category: 'Statsleder',
-    description: 'Morale captain med enorm clutch-defense.',
-    attack: 82,
-    defense: 94,
-    influence: 95,
-    strategy: 88,
-    charisma: 93
-  },
-  {
-    name: 'Keanu Reeves',
-    image_url: 'https://upload.wikimedia.org/wikipedia/commons/5/5d/Keanu_Reeves_2014.jpg',
-    rarity: 'Rare',
-    category: 'Kjendis',
-    description: 'Lavmælt dodge-master med wholesome aura.',
-    attack: 84,
-    defense: 79,
-    influence: 78,
-    strategy: 72,
-    charisma: 90
-  },
-  {
-    name: 'Chuck Norris',
-    image_url: 'https://upload.wikimedia.org/wikipedia/commons/b/b1/Chuck_Norris%2C_The_Delta_Force_1986.jpg',
-    rarity: 'Epic',
-    category: 'Kjendis',
-    description: 'Actionveteran med urealistisk høy filmsoldat-attack.',
-    attack: 99,
-    defense: 86,
-    influence: 80,
-    strategy: 70,
-    charisma: 82
-  },
-  {
-    name: 'Winston Churchill',
-    image_url: 'https://commons.wikimedia.org/wiki/Special:FilePath/Sir_Winston_Churchill_-_19086236948.jpg',
-    rarity: 'Legendary',
-    category: 'Militaer/Strategi',
-    description: 'Krigstidsleder med sigar, stahet og massiv morale-bonus.',
-    attack: 81,
-    defense: 91,
-    influence: 96,
-    strategy: 90,
-    charisma: 92
-  },
-  {
-    name: 'Dwight D. Eisenhower',
-    image_url: 'https://commons.wikimedia.org/wiki/Special:FilePath/Dwight_D._Eisenhower,_official_Presidential_portrait.jpg',
-    rarity: 'Legendary',
-    category: 'Militaer/Strategi',
-    description: 'Supreme Allied Commander med logistikkbuff og iskald planlegging.',
-    attack: 84,
-    defense: 90,
-    influence: 94,
-    strategy: 98,
-    charisma: 82
-  },
-  {
-    name: 'George S. Patton',
-    image_url: 'https://commons.wikimedia.org/wiki/Special:FilePath/General_George_S._Patton,_Jr.jpg',
-    rarity: 'Epic',
-    category: 'Militaer/Strategi',
-    description: 'Panserpush, høyt tempo og null tålmodighet for defensiv camping.',
-    attack: 95,
-    defense: 75,
-    influence: 84,
-    strategy: 88,
-    charisma: 80
-  },
-  {
-    name: 'Douglas MacArthur',
-    image_url: 'https://commons.wikimedia.org/wiki/Special:FilePath/Douglas_MacArthur_lands_Leyte1.jpg',
-    rarity: 'Epic',
-    category: 'Militaer/Strategi',
-    description: 'Dramatisk comeback-general med høy influence og enda høyere selvtillit.',
-    attack: 88,
-    defense: 78,
-    influence: 90,
-    strategy: 86,
-    charisma: 87
-  },
-  {
-    name: 'Georgy Zhukov',
-    image_url: 'https://commons.wikimedia.org/wiki/Special:FilePath/Georgy_Zhukov_1941.jpg',
-    rarity: 'Legendary',
-    category: 'Militaer/Strategi',
-    description: 'Østfrontens harde strateg. Defense og attack går begge rett gjennom taket.',
-    attack: 92,
-    defense: 94,
-    influence: 88,
-    strategy: 96,
-    charisma: 70
-  },
-  {
-    name: 'Sun Tzu',
-    image_url: 'https://commons.wikimedia.org/wiki/Special:FilePath/Sun_Tzu_Statue_in_Yurihama,_Tottori.jpg',
-    rarity: 'Mythic',
-    category: 'Historisk',
-    description: 'Strategi-metaens urfar. Vinner halve kampen før den starter.',
-    attack: 76,
-    defense: 82,
-    influence: 93,
-    strategy: 100,
-    charisma: 78
-  },
-  {
-    name: 'Julius Caesar',
-    image_url: 'https://commons.wikimedia.org/wiki/Special:FilePath/Gaius_Julius_Caesar_(100-44_BC).JPG',
-    rarity: 'Legendary',
-    category: 'Historisk',
-    description: 'Legionær-kommandør med brutal tempo-control og senat-debuff.',
-    attack: 93,
-    defense: 83,
-    influence: 94,
-    strategy: 95,
-    charisma: 90
-  },
-  {
-    name: 'Alexander den store',
-    image_url: 'https://commons.wikimedia.org/wiki/Special:FilePath/Alexander_the_Great_mosaic.jpg',
-    rarity: 'Legendary',
-    category: 'Historisk',
-    description: 'Ekspansjon på maks vanskelighetsgrad. Angriper før kartet er ferdig lastet.',
-    attack: 97,
-    defense: 80,
-    influence: 91,
-    strategy: 94,
-    charisma: 89
-  },
-  {
-    name: 'Hannibal Barca',
-    image_url: 'https://commons.wikimedia.org/wiki/Special:FilePath/Hannibal_Barca_bust_from_Capua_photo.jpg',
-    rarity: 'Epic',
-    category: 'Historisk',
-    description: 'Flankeangrep, fjellpass og en plan ingen på motstanderlaget liker.',
-    attack: 91,
-    defense: 79,
-    influence: 84,
-    strategy: 97,
-    charisma: 82
+  Idrett: {
+    description: 'Idrettskort med tempo, press, clutch og ren vinnermentalitet.',
+    modifiers: { attack: 9, defense: 3, influence: 5, strategy: 4, charisma: 7 }
   }
-];
+};
+
+const cardPools = {
+  'Militær/Strategi': {
+    Common: [
+      'Robert E. Lee',
+      'Stonewall Jackson',
+      'Mikhail Kutuzov',
+      'Ferdinand Foch',
+      'Helmuth von Moltke',
+      'Gustavus Adolphus',
+      'Themistokles',
+      'Flavius Belisarius',
+      'Bernard Montgomery',
+      'Harald Hardråde',
+      'Vlad Dracula',
+      'Garibaldi'
+    ],
+    Rare: [
+      'George S. Patton',
+      'Dwight D. Eisenhower',
+      'Douglas MacArthur',
+      'Erwin Rommel',
+      'Ulysses S. Grant',
+      'William Tecumseh Sherman',
+      'Richard Løvehjerte',
+      'Simón Bolívar',
+      'Charles de Gaulle',
+      'Isoroku Yamamoto',
+      'Chester W. Nimitz',
+      'Heinz Guderian'
+    ],
+    Epic: [
+      'Hannibal Barca',
+      'Georgij Zjukov',
+      'Carl von Clausewitz',
+      'Horatio Nelson',
+      'Arthur Wellesley, Duke of Wellington',
+      'Saladin',
+      'Jeanne d’Arc',
+      'Tamerlane',
+      'Yi Sun-sin',
+      'Spartacus',
+      'Leonidas av Sparta'
+    ],
+    Legendary: ['Napoleon Bonaparte', 'Julius Caesar', 'Alexander den store', 'Genghis Khan'],
+    Mythic: ['Sun Tzu']
+  },
+  Statsleder: {
+    Common: [
+      'George W. Bush',
+      'Bill Clinton',
+      'Tony Blair',
+      'Boris Johnson',
+      'Rishi Sunak',
+      'Olaf Scholz',
+      'Kim Jong-il',
+      'Kim Il-sung',
+      'Indira Gandhi',
+      'Bashar al-Assad',
+      'Benito Mussolini',
+      'David Ben-Gurion',
+      'Joe Biden',
+      'Emmanuel Macron',
+      'Angela Merkel',
+      'Narendra Modi',
+      'Benjamin Netanyahu'
+    ],
+    Rare: [
+      'Donald Trump',
+      'Barack Obama',
+      'Ronald Reagan',
+      'John F. Kennedy',
+      'Margaret Thatcher',
+      'Kim Jong-un',
+      'Fidel Castro',
+      'Che Guevara',
+      'Recep Tayyip Erdoğan'
+    ],
+    Epic: [
+      'Winston Churchill',
+      'Franklin D. Roosevelt',
+      'Vladimir Putin',
+      'Volodymyr Zelenskyj',
+      'Xi Jinping',
+      'Nelson Mandela',
+      'Mahatma Gandhi',
+      'Saddam Hussein',
+      'Muammar Gaddafi',
+      'Ayatollah Khomeini'
+    ],
+    Legendary: ['Abraham Lincoln', 'Mao Zedong'],
+    Mythic: ['Josef Stalin', 'Adolf Hitler']
+  },
+  Politiker: {
+    Common: [
+      'Trygve Bratteli',
+      'Sylvi Listhaug',
+      'Siv Jensen',
+      'Carl I. Hagen',
+      'Trygve Slagsvold Vedum',
+      'Audun Lysbakken',
+      'Bjørnar Moxnes',
+      'Lan Marie Berg',
+      'Abid Raja',
+      'Børge Brende',
+      'Josep Borrell',
+      'Nancy Pelosi',
+      'Ine Eriksen Søreide',
+      'Espen Barth Eide',
+      'Kaja Kallas',
+      'Bernie Sanders',
+      'Kamala Harris'
+    ],
+    Rare: [
+      'Jonas Gahr Støre',
+      'Erna Solberg',
+      'Gro Harlem Brundtland',
+      'Einar Gerhardsen',
+      'Ursula von der Leyen',
+      'Hillary Clinton'
+    ],
+    Epic: ['Jens Stoltenberg'],
+    Legendary: [],
+    Mythic: []
+  },
+  Kjendis: {
+    Common: [
+      'Gordon Ramsay',
+      'Kanye West',
+      'Snoop Dogg',
+      'Mark Zuckerberg',
+      'Jeff Bezos',
+      'Bill Gates',
+      'Dwayne "The Rock" Johnson',
+      'Arnold Schwarzenegger',
+      'Tom Cruise',
+      'Keanu Reeves',
+      'Leonardo DiCaprio'
+    ],
+    Rare: ['Elon Musk', 'Taylor Swift', 'Beyoncé', 'Rihanna'],
+    Epic: [],
+    Legendary: [],
+    Mythic: []
+  },
+  Idrett: {
+    Common: [
+      'Zlatan Ibrahimović',
+      'Neymar',
+      'Conor McGregor',
+      'Usain Bolt',
+      'LeBron James',
+      'Kobe Bryant',
+      'Serena Williams',
+      'Magnus Carlsen'
+    ],
+    Rare: ['Cristiano Ronaldo', 'Lionel Messi', 'Erling Braut Haaland', 'Kylian Mbappé', 'Mike Tyson', 'Muhammad Ali', 'Michael Jordan'],
+    Epic: [],
+    Legendary: [],
+    Mythic: []
+  }
+};
+
+function hashName(name) {
+  let hash = 0;
+  for (const char of name) hash = (hash * 31 + char.charCodeAt(0)) >>> 0;
+  return hash;
+}
+
+function statFor(name, rarity, category, stat, index) {
+  const profile = rarityProfiles[rarity];
+  const modifier = categoryProfiles[category].modifiers[stat] || 0;
+  const noise = (hashName(`${name}:${stat}:${index}`) % profile.spread) - Math.floor(profile.spread / 2);
+  return Math.max(25, Math.min(99, profile.base + modifier + noise));
+}
+
+function makeCard(name, category, rarity, index) {
+  const attack = statFor(name, rarity, category, 'attack', index);
+  const defense = statFor(name, rarity, category, 'defense', index);
+  const influence = statFor(name, rarity, category, 'influence', index);
+  const strategy = statFor(name, rarity, category, 'strategy', index);
+  const charisma = statFor(name, rarity, category, 'charisma', index);
+  const rating = attack + defense + influence + strategy + charisma;
+  const ratingBonus = Math.max(0, rating - 250) * 3;
+
+  return {
+    name,
+    image_url: null,
+    rarity,
+    category,
+    description: `${categoryProfiles[category].description} ${rarity}-kort med totalrating ${rating}.`,
+    attack,
+    defense,
+    influence,
+    strategy,
+    charisma,
+    sell_value: Math.round((rarityProfiles[rarity].sell + ratingBonus) / 50) * 50
+  };
+}
+
+export const seedCards = Object.entries(cardPools).flatMap(([category, rarities]) =>
+  Object.entries(rarities).flatMap(([rarity, names]) => names.map((name, index) => makeCard(name, category, rarity, index)))
+);

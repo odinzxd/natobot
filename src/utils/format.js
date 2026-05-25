@@ -23,11 +23,11 @@ export const defaultDropRates = {
 };
 
 export const rarityBaseSellValues = {
-  Common: 750,
-  Rare: 2200,
-  Epic: 6500,
-  Legendary: 22000,
-  Mythic: 65000
+  Common: 250,
+  Rare: 1200,
+  Epic: 4200,
+  Legendary: 14500,
+  Mythic: 42000
 };
 
 export const packConfigs = {
@@ -64,7 +64,7 @@ export function cardRating(card) {
 export function cardSellValue(card) {
   if (card.sell_value && Number(card.sell_value) > 100) return Number(card.sell_value);
   const base = rarityBaseSellValues[card.rarity] || 750;
-  const ratingBonus = Math.max(0, cardRating(card) - 250) * 12;
+  const ratingBonus = Math.max(0, cardRating(card) - 250) * 3;
   return Math.round((base + ratingBonus) / 50) * 50;
 }
 
