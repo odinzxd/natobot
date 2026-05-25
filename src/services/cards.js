@@ -73,6 +73,26 @@ export async function getOwnedCardCopy(userId, cardQuery) {
   return byName.rows[0] || null;
 }
 
+export async function searchOwnedCardCopies(userId, search = '', limit = 25) {
+  const result = await query(
+    `SELECT uc.id AS user_card_id, c.name, c.rarity, c.sell_value,
+            (c.attack + c.defense + c.influence + c.strategy + c.charisma) AS rating
+     FROM user_cards uc
+     JOIN cards c ON c.id = uc.card_id
+     WHERE uc.user_id = $1
+       AND uc.locked_reason IS NULL
+       AND c.active = TRUE
+       AND ($2 = '' OR LOWER(c.name) LIKE LOWER($3) OR CAST(uc.id AS TEXT) LIKE $4)
+     ORDER BY
+       CASE c.rarity WHEN 'Mythic' THEN 5 WHEN 'Legendary' THEN 4 WHEN 'Epic' THEN 3 WHEN 'Rare' THEN 2 ELSE 1 END DESC,
+       c.sell_value DESC,
+       uc.id ASC
+     LIMIT $5`,
+    [userId, search, `%${search}%`, `${search}%`, limit]
+  );
+  return result.rows;
+}
+
 export function cardEmbed(card, title = card.name) {
   return new EmbedBuilder()
     .setTitle(title)

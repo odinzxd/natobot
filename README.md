@@ -126,7 +126,8 @@ Do not paste the placeholder values from `.env.example` into Railway. If Railway
 - `/daily`
 - `/shop`
 - `/buy pack:standard`
-- `/sell card:123`
+- `/sell cards:123`
+- `/sell cards:123, 124, 125`
 - `/leaderboard type:wins`
 - `/trade start user:@bruker`
 - `/trade add-card trade-id:1 card:123`
@@ -149,7 +150,7 @@ Inventory grupperer duplikater etter korttype, men viser copy-id-er internt i da
 - Nye brukere starter med 10 000 coins.
 - Daily gir 7 500 coins.
 - Battle winner får 3 500 coins, taper får 750 coins.
-- `/sell` selger et kort direkte til systemet. Sell-pris beregnes fra rarity og rating og lagres i databasen.
+- `/sell` har autocomplete på kort du eier og kan selge flere copy-id-er samtidig, f.eks. `/sell cards:123, 124, 125`.
 
 ## Admin-tilgang
 

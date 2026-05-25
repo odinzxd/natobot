@@ -51,28 +51,42 @@ export async function buyPack(userId, packKey) {
 }
 
 export async function sellOwnedCard(userId, userCardId) {
+  const result = await sellOwnedCards(userId, [userCardId]);
+  return result.cards[0];
+}
+
+export async function sellOwnedCards(userId, userCardIds) {
+  const uniqueIds = [...new Set(userCardIds.map((id) => Number(id)).filter((id) => Number.isInteger(id) && id > 0))];
+  if (!uniqueIds.length) throw new Error('Skriv inn minst én gyldig copy-id fra inventory.');
+
   return withTransaction(async (client) => {
     const result = await client.query(
       `SELECT uc.id AS user_card_id, c.*
        FROM user_cards uc
        JOIN cards c ON c.id = uc.card_id
-       WHERE uc.id = $1 AND uc.user_id = $2 AND uc.locked_reason IS NULL AND c.active = TRUE
+       WHERE uc.id = ANY($1::BIGINT[]) AND uc.user_id = $2 AND uc.locked_reason IS NULL AND c.active = TRUE
        FOR UPDATE OF uc`,
-      [userCardId, userId]
+      [uniqueIds, userId]
     );
-    if (!result.rowCount) throw new Error('Du eier ikke dette kortet, eller det er låst i trade/market.');
+    if (result.rowCount !== uniqueIds.length) {
+      throw new Error('Ett eller flere kort finnes ikke, eies ikke av deg, eller er låst i trade/market.');
+    }
 
-    const card = result.rows[0];
-    await client.query('DELETE FROM squads WHERE user_card_id = $1', [userCardId]);
-    await client.query('DELETE FROM user_cards WHERE id = $1', [userCardId]);
-    await client.query('UPDATE users SET coins = coins + $1, updated_at = NOW() WHERE id = $2', [card.sell_value, userId]);
+    const cards = result.rows;
+    const total = cards.reduce((sum, card) => sum + Number(card.sell_value), 0);
+    await client.query('DELETE FROM squads WHERE user_card_id = ANY($1::BIGINT[])', [uniqueIds]);
+    await client.query('DELETE FROM user_cards WHERE id = ANY($1::BIGINT[])', [uniqueIds]);
+    await client.query('UPDATE users SET coins = coins + $1, updated_at = NOW() WHERE id = $2', [total, userId]);
     await client.query('INSERT INTO transactions (user_id, amount, type, metadata) VALUES ($1, $2, $3, $4)', [
       userId,
-      card.sell_value,
+      total,
       'quick_sell',
-      { user_card_id: userCardId, card_id: card.id, card_name: card.name }
+      {
+        user_card_ids: uniqueIds,
+        cards: cards.map((card) => ({ card_id: card.id, copy_id: card.user_card_id, name: card.name, sell_value: card.sell_value }))
+      }
     ]);
 
-    return card;
+    return { cards, total };
   });
 }

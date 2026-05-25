@@ -17,9 +17,22 @@ client.once(Events.ClientReady, (readyClient) => {
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {
-  if (!interaction.isChatInputCommand()) return;
   const command = client.commands.get(interaction.commandName);
   if (!command) return;
+
+  if (interaction.isAutocomplete()) {
+    try {
+      if (command.autocomplete) {
+        await command.autocomplete(interaction);
+      }
+    } catch (error) {
+      console.error(`[autocomplete] ${interaction.commandName} failed:`, error);
+      if (!interaction.responded) await interaction.respond([]);
+    }
+    return;
+  }
+
+  if (!interaction.isChatInputCommand()) return;
 
   const originalReply = interaction.reply.bind(interaction);
   const originalFollowUp = interaction.followUp.bind(interaction);

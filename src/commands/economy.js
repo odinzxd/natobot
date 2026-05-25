@@ -1,10 +1,14 @@
 import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 import { query } from '../database/pool.js';
 import { ensureUser, addCoins } from '../services/users.js';
-import { buyPack, sellOwnedCard } from '../services/economy.js';
-import { getOwnedCardCopy } from '../services/cards.js';
+import { buyPack, sellOwnedCards } from '../services/economy.js';
+import { searchOwnedCardCopies } from '../services/cards.js';
 import { packConfigs, formatDuration, cardRating, rarityColors } from '../utils/format.js';
 import { config } from '../config.js';
+
+function parseCopyIds(input) {
+  return [...new Set((input.match(/\d+/g) || []).map((id) => Number(id)).filter((id) => Number.isInteger(id) && id > 0))];
+}
 
 export const balance = {
   data: new SlashCommandBuilder().setName('balance').setDescription('Vis coins, XP og level.'),
@@ -70,24 +74,49 @@ export const buy = {
 export const sell = {
   data: new SlashCommandBuilder()
     .setName('sell')
-    .setDescription('Selg et kort direkte til systemet for coins.')
-    .addStringOption((option) => option.setName('card').setDescription('Kortnavn eller copy-id fra inventory').setRequired(true)),
+    .setDescription('Selg ett eller flere kort direkte til systemet for coins.')
+    .addStringOption((option) =>
+      option
+        .setName('cards')
+        .setDescription('Copy-id-er fra inventory, f.eks. 12, 15, 18')
+        .setRequired(true)
+        .setAutocomplete(true)
+    ),
+  async autocomplete(interaction) {
+    const user = await ensureUser(interaction.user);
+    const focused = interaction.options.getFocused();
+    const lastSearch = String(focused).split(',').pop().trim();
+    const existingPrefix = String(focused).includes(',') ? `${String(focused).split(',').slice(0, -1).join(',')}, ` : '';
+    const cards = await searchOwnedCardCopies(user.id, lastSearch);
+    await interaction.respond(
+      cards.map((card) => ({
+        name: `#${card.user_card_id} ${card.name} [${card.rarity}] - ${Number(card.sell_value).toLocaleString('no-NO')} coins`.slice(0, 100),
+        value: `${existingPrefix}${card.user_card_id}`
+      }))
+    );
+  },
   async execute(interaction) {
     const user = await ensureUser(interaction.user);
-    const owned = await getOwnedCardCopy(user.id, interaction.options.getString('card'));
-    if (!owned) {
-      await interaction.reply({ content: 'Fant ikke et tilgjengelig kort du eier.', ephemeral: true });
+    const copyIds = parseCopyIds(interaction.options.getString('cards'));
+    if (!copyIds.length) {
+      await interaction.reply({ content: 'Skriv inn én eller flere copy-id-er fra inventory, f.eks. `12, 15, 18`.', ephemeral: true });
       return;
     }
 
-    const sold = await sellOwnedCard(user.id, owned.user_card_id);
+    const { cards, total } = await sellOwnedCards(user.id, copyIds);
+    const preview = cards
+      .slice(0, 10)
+      .map((card) => `#${card.user_card_id} ${card.name} [${card.rarity}] - ${Number(card.sell_value).toLocaleString('no-NO')}`)
+      .join('\n');
+    const extra = cards.length > 10 ? `\n...og ${cards.length - 10} til.` : '';
+    const best = cards.toSorted((a, b) => cardRating(b) - cardRating(a))[0];
     const embed = new EmbedBuilder()
-      .setTitle(`Solgte ${sold.name}`)
-      .setColor(rarityColors[sold.rarity])
-      .setDescription(`Du fikk ${sold.sell_value.toLocaleString('no-NO')} coins.`)
+      .setTitle(`Solgte ${cards.length} kort`)
+      .setColor(rarityColors[best.rarity])
+      .setDescription(`${preview}${extra}`)
       .addFields(
-        { name: 'Rarity', value: sold.rarity, inline: true },
-        { name: 'Rating', value: String(cardRating(sold)), inline: true }
+        { name: 'Totalt', value: `${total.toLocaleString('no-NO')} coins`, inline: true },
+        { name: 'Copy-id-er', value: copyIds.join(', ').slice(0, 1024), inline: false }
       );
     await interaction.reply({ embeds: [embed] });
   }
