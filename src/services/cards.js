@@ -2,12 +2,15 @@ import { EmbedBuilder } from 'discord.js';
 import { query } from '../database/pool.js';
 import { cardRating, defaultDropRates, pickWeighted, rarityColors } from '../utils/format.js';
 
-export async function findCard(input) {
+export async function findCard(input, { includeInactive = false } = {}) {
   if (!input) return null;
   const trimmed = input.trim();
   const result = /^\d+$/.test(trimmed)
-    ? await query('SELECT * FROM cards WHERE id = $1', [trimmed])
-    : await query('SELECT * FROM cards WHERE LOWER(name) LIKE LOWER($1) ORDER BY active DESC, id LIMIT 1', [`%${trimmed}%`]);
+    ? await query(`SELECT * FROM cards WHERE id = $1 ${includeInactive ? '' : 'AND active = TRUE'}`, [trimmed])
+    : await query(
+        `SELECT * FROM cards WHERE LOWER(name) LIKE LOWER($1) ${includeInactive ? '' : 'AND active = TRUE'} ORDER BY active DESC, id LIMIT 1`,
+        [`%${trimmed}%`]
+      );
   return result.rows[0] || null;
 }
 
@@ -33,7 +36,7 @@ export async function getInventory(userId, page = 1, pageSize = 10) {
             ARRAY_AGG(uc.id ORDER BY uc.id) AS copies
      FROM user_cards uc
      JOIN cards c ON c.id = uc.card_id
-     WHERE uc.user_id = $1
+     WHERE uc.user_id = $1 AND c.active = TRUE
      GROUP BY c.id
      ORDER BY
        CASE c.rarity WHEN 'Mythic' THEN 5 WHEN 'Legendary' THEN 4 WHEN 'Epic' THEN 3 WHEN 'Rare' THEN 2 ELSE 1 END DESC,
@@ -41,7 +44,10 @@ export async function getInventory(userId, page = 1, pageSize = 10) {
      LIMIT $2 OFFSET $3`,
     [userId, pageSize, offset]
   );
-  const count = await query('SELECT COUNT(DISTINCT card_id)::INT AS total FROM user_cards WHERE user_id = $1', [userId]);
+  const count = await query(
+    'SELECT COUNT(DISTINCT uc.card_id)::INT AS total FROM user_cards uc JOIN cards c ON c.id = uc.card_id WHERE uc.user_id = $1 AND c.active = TRUE',
+    [userId]
+  );
   return { rows: rows.rows, total: count.rows[0].total };
 }
 
@@ -50,7 +56,7 @@ export async function getOwnedCardCopy(userId, cardQuery) {
     const byCopy = await query(
       `SELECT uc.id AS user_card_id, c.* FROM user_cards uc
        JOIN cards c ON c.id = uc.card_id
-       WHERE uc.id = $1 AND uc.user_id = $2 AND uc.locked_reason IS NULL`,
+       WHERE uc.id = $1 AND uc.user_id = $2 AND uc.locked_reason IS NULL AND c.active = TRUE`,
       [cardQuery, userId]
     );
     if (byCopy.rows[0]) return byCopy.rows[0];
@@ -59,7 +65,7 @@ export async function getOwnedCardCopy(userId, cardQuery) {
   const byName = await query(
     `SELECT uc.id AS user_card_id, c.* FROM user_cards uc
      JOIN cards c ON c.id = uc.card_id
-     WHERE uc.user_id = $1 AND uc.locked_reason IS NULL AND LOWER(c.name) LIKE LOWER($2)
+     WHERE uc.user_id = $1 AND uc.locked_reason IS NULL AND c.active = TRUE AND LOWER(c.name) LIKE LOWER($2)
      ORDER BY uc.id
      LIMIT 1`,
     [userId, `%${cardQuery}%`]

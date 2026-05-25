@@ -7,7 +7,7 @@ export async function getSquad(userId) {
      FROM squads s
      JOIN user_cards uc ON uc.id = s.user_card_id
      JOIN cards c ON c.id = uc.card_id
-     WHERE s.user_id = $1
+     WHERE s.user_id = $1 AND c.active = TRUE
      ORDER BY s.position`,
     [userId]
   );
@@ -58,7 +58,7 @@ export async function autoSquad(userId) {
               (c.attack + c.defense + c.influence + c.strategy + c.charisma) AS rating
        FROM user_cards uc
        JOIN cards c ON c.id = uc.card_id
-       WHERE uc.user_id = $1 AND uc.locked_reason IS NULL
+       WHERE uc.user_id = $1 AND uc.locked_reason IS NULL AND c.active = TRUE
        ORDER BY rating DESC
        LIMIT 5`,
       [userId]

@@ -13,6 +13,8 @@ export async function migrate() {
 }
 
 export async function seed() {
+  const seedNames = seedCards.map((card) => card.name);
+
   for (const card of seedCards) {
     await query(
       `INSERT INTO cards
@@ -42,6 +44,15 @@ export async function seed() {
       ]
     );
   }
+  await query('UPDATE cards SET active = FALSE WHERE NOT (name = ANY($1::TEXT[]))', [seedNames]);
+  await query(
+    `DELETE FROM squads
+     WHERE user_card_id IN (
+       SELECT uc.id FROM user_cards uc
+       JOIN cards c ON c.id = uc.card_id
+       WHERE c.active = FALSE
+     )`
+  );
   console.log(`[database] Seeded ${seedCards.length} cards`);
 }
 

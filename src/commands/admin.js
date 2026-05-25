@@ -95,7 +95,7 @@ export async function execute(interaction) {
   }
 
   if (sub === 'toggle-card') {
-    const card = await findCard(interaction.options.getString('card'));
+    const card = await findCard(interaction.options.getString('card'), { includeInactive: true });
     if (!card) throw new Error('Fant ikke kortet.');
     const result = await query('UPDATE cards SET active = NOT active WHERE id = $1 RETURNING active', [card.id]);
     await interaction.reply(`${card.name} er nå ${result.rows[0].active ? 'aktivt' : 'deaktivert'}.`);
@@ -103,7 +103,7 @@ export async function execute(interaction) {
   }
 
   if (sub === 'remove-card') {
-    const card = await findCard(interaction.options.getString('card'));
+    const card = await findCard(interaction.options.getString('card'), { includeInactive: true });
     if (!card) throw new Error('Fant ikke kortet.');
     await query('UPDATE cards SET active = FALSE WHERE id = $1', [card.id]);
     await interaction.reply(`${card.name} er deaktivert og kan ikke droppes i nye packs/claims.`);
@@ -120,7 +120,7 @@ export async function execute(interaction) {
 
   if (sub === 'give-card') {
     const target = await ensureUser(interaction.options.getUser('user'));
-    const card = await findCard(interaction.options.getString('card'));
+    const card = await findCard(interaction.options.getString('card'), { includeInactive: true });
     if (!card) throw new Error('Fant ikke kortet.');
     await grantCard(target.id, card.id);
     await interaction.reply(`Ga ${card.name} til <@${target.discord_id}>.`);
