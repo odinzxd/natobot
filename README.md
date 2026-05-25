@@ -13,6 +13,7 @@ Natobot er en Discord-bot bygget i Node.js med `discord.js` og PostgreSQL. Den f
 - Sikker trading med locked cards og accept fra begge parter.
 - Marketplace med sell, buy, cancel og list.
 - Admin commands for kort, coins, claim reset og databaseinfo.
+- Kortbilder hentes automatisk fra Wikipedia/Wikimedia ved seed, med fallback-bilde hvis ingen match finnes.
 
 ## Filstruktur
 
