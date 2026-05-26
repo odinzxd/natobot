@@ -11,6 +11,10 @@ const categoryProfiles = {
     description: 'Strategikort med krigsledelse, taktikk og hard kampkontroll.',
     modifiers: { attack: 7, defense: 6, influence: 3, strategy: 9, charisma: 1 }
   },
+    'Influenser': {
+    description: 'Strategikort med krigsledelse, taktikk og hard kampkontroll.',
+    modifiers: { attack: 3, defense: 3, influence: 9, strategy: 9, charisma: 1 }
+  },
   'Operatør': {
     description: 'Operatørkort med presisjon, tempo og kampkraft i små team.',
     modifiers: { attack: 9, defense: 5, influence: 2, strategy: 6, charisma: 2 }
@@ -99,6 +103,7 @@ const roster = [
   ['Lhana Rhodes', 'Operatør', 5],
   ['Ginger Fox', 'Operatør', 5],
   ['Sins', 'Operatør', 5],
+  ['Sikkerhetsproffen', 'Operatør', 3],
   ['War Machine', 'Sci-fi/Fantasy', 4],
   ['Winter Soldier', 'Operatør', 4],
   ['Deadshot', 'Operatør', 4],
